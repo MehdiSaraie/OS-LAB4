@@ -598,3 +598,24 @@ giveYoungestChild(int pid)
 
   return -1;
 }
+
+//added
+struct spinlock testSpinlock;
+
+int recfuncTest(int i)
+{
+  if (i == 0)
+    return 0;
+  acquire(&testSpinlock);
+  cprintf("%d\n", i--);
+  recfuncTest(i);
+  release(&testSpinlock);
+  return 0;
+}
+
+int spinlockTest(int i)
+{
+  initlock(&testSpinlock, "testSpinlock");
+  recfuncTest(i);
+  return 0;
+}

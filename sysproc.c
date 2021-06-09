@@ -201,3 +201,26 @@ int sys_getDescendants(void)
 
   return 1;
 }
+
+
+//added
+int sys_spinlockTest(void)
+{
+  int i;
+  if (argint(0, &i) < 0)
+    return -1;
+  spinlockTest(i);
+  return 0;
+}
+
+//added
+int sys_rwinit(void)
+{
+	return 0;
+}
+
+//added
+int sys_rwtest(void)
+{
+	return 0;
+}

@@ -28,6 +28,9 @@ int processStartTime(void);
 int getAncestors(int);
 int setSleep(int);
 int getDescendants(int);
+int spinlockTest(int);
+int rwinit(void);
+int rwtest(uint);
 
 // ulib.c
 int stat(const char*, struct stat*);
