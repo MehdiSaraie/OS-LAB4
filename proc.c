@@ -616,7 +616,9 @@ int rwinit(uint ticks) {
     cprintf("fork failed\n");
     return -1;
   }
-
+  
+  return 0;
+}
 //added
 struct spinlock testSpinlock;
 
