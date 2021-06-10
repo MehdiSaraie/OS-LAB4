@@ -599,26 +599,6 @@ giveYoungestChild(int pid)
   return -1;
 }
 
-int rwinit(uint ticks) {
-  cprintf("-rwinit\n");
-  int n = fork(ticks);
-  cprintf("I'm %d\n", myproc()->pid);
-
-  if (n == 0) { // child
-    cprintf("-I'm %d, child\n", myproc()->pid);
-  }
-  else if(n > 0) {  // parent
-    cprintf("-I'm %d,parent of ", myproc()->pid);
-    cprintf("%d\n", giveYoungestChild(myproc()->pid));
-    wait();
-  }
-  else {
-    cprintf("fork failed\n");
-    return -1;
-  }
-  
-  return 0;
-}
 //added
 struct spinlock testSpinlock;
 
@@ -635,5 +615,23 @@ int recfuncTest(int i) {
 int spinlockTest(int i) {
   initlock(&testSpinlock, "testSpinlock");
   recfuncTest(i);
+  return 0;
+}
+
+// added
+struct spinlock rw_mutex;
+struct spinlock mutex;
+int read_count;
+
+int rwinit(void) {
+  initlock(&rw_mutex, "rw_mutex");
+  initlock(&mutex, "mutex");
+  read_count = 0;
+  cprintf("- rw lock initialized\n");
+  return 0;
+}
+
+int rwtest(int role) {
+  cprintf("role: %d\n", role);
   return 0;
 }

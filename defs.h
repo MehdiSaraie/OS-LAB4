@@ -122,8 +122,9 @@ void            wakeup(void*);
 void            yield(void);
 int             giveParent(int);           // added
 int             giveYoungestChild(int);    // added
-int             rwinit(uint);              // added
-int             spinlockTest(int);        // added
+int             spinlockTest(int);         // added
+int             rwinit(void);              // added
+int             rwtest(int);               // added
 
     // swtch.S
     void swtch(struct context **, struct context *);
