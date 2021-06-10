@@ -15,47 +15,64 @@ initlock(struct spinlock *lk, char *name)
   lk->name = name;
   lk->locked = 0;
   lk->cpu = 0;
-  //lk->proc = myproc()->pid; //added
+  lk->proc = 0; //added
+  lk->reentrance = 0; //added
 }
 
 // Acquire the lock.
 // Loops (spins) until the lock is acquired.
 // Holding a lock for a long time may cause
 // other CPUs to waste time spinning to acquire it.
-void
+void 
 acquire(struct spinlock *lk)
 {
-  //if (lk->proc != myproc()->pid || lk->proc == -1) //added
-  //{
-    pushcli(); // disable interrupts to avoid deadlock.
-    if(holding(lk))
-      panic("acquire");
+  if (lk->proc == myproc())
+  {
+    lk->reentrance += 1;
+    pushcli();
+    lk->cpu = mycpu();
+    popcli();
+  }
+  else
+  {
+  pushcli(); // disable interrupts to avoid deadlock.
+  
+  if(holding(lk))
+    panic("acquire");
 
-    // The xchg is atomic.
-    while(xchg(&lk->locked, 1) != 0)
-      ;
-    //lk->proc = myproc()->pid; //added
-  //}
+  // The xchg is atomic.
+  while(xchg(&lk->locked, 1) != 0)
+    ; 
   // Tell the C compiler and the processor to not move loads or stores
   // past this point, to ensure that the critical section's memory
   // references happen after the lock is acquired.
   __sync_synchronize();
-
+   
   // Record info about lock acquisition for debugging.
+  lk->proc = myproc(); //added
   lk->cpu = mycpu();
   getcallerpcs(&lk, lk->pcs);
+  }
 }
 
 // Release the lock.
 void
 release(struct spinlock *lk)
 {
+  if (lk->proc == myproc())
+  {
+    lk->reentrance -= 1;
+    if(lk->reentrance == 0)
+      lk->proc = 0;
+  }
+  if (lk->proc != myproc())
+  {
   if(!holding(lk))
     panic("release");
-
+  
   lk->pcs[0] = 0;
   lk->cpu = 0;
-  //lk->proc = -1; //added
+  lk->proc = 0;
   // Tell the C compiler and the processor to not move loads or stores
   // past this point, to ensure that all the stores in the critical
   // section are visible to other cores before the lock is released.
@@ -67,8 +84,8 @@ release(struct spinlock *lk)
   // This code can't use a C assignment, since it might
   // not be atomic. A real OS would use C atomics here.
   asm volatile("movl $0, %0" : "+m" (lk->locked) : );
-
   popcli();
+  }
 }
 
 // Record the current call stack in pcs[] by following the %ebp chain.
