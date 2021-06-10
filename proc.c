@@ -598,3 +598,24 @@ giveYoungestChild(int pid)
 
   return -1;
 }
+
+int rwinit(uint ticks) {
+  cprintf("-rwinit\n");
+  int n = fork(ticks);
+  cprintf("I'm %d\n", myproc()->pid);
+
+  if (n == 0) { // child
+    cprintf("-I'm %d, child\n", myproc()->pid);
+  }
+  else if(n > 0) {  // parent
+    cprintf("-I'm %d,parent of ", myproc()->pid);
+    cprintf("%d\n", giveYoungestChild(myproc()->pid));
+    wait();
+  }
+  else {
+    cprintf("fork failed\n");
+    return -1;
+  }
+
+  return 0;
+}

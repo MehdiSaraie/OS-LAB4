@@ -108,6 +108,7 @@ extern int sys_processStartTime(void);
 extern int sys_getAncestors(void);
 extern int sys_setSleep(void);
 extern int sys_getDescendants(void);
+extern int sys_rwinit(void);
 
 static int (*syscalls[])(void) = {
     [SYS_fork] sys_fork,
@@ -136,6 +137,7 @@ static int (*syscalls[])(void) = {
     [SYS_getAncestors] sys_getAncestors,
     [SYS_setSleep] sys_setSleep,
     [SYS_getDescendants] sys_getDescendants,
+    [SYS_rwinit] sys_rwinit,
 };
 
 void

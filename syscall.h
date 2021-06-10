@@ -25,3 +25,4 @@
 #define SYS_getAncestors 24
 #define SYS_setSleep 25
 #define SYS_getDescendants 26
+#define SYS_rwinit 28

@@ -201,3 +201,25 @@ int sys_getDescendants(void)
 
   return 1;
 }
+
+// added
+int sys_rwinit(void) {
+  // return rwinit(ticks);
+  int n = sys_fork();
+
+  cprintf("I'm %d\n", myproc()->pid);
+
+  if (n == 0) { // child
+    cprintf("-I'm %d, child\n", myproc()->pid);
+  }
+  else if(n > 0) {  // parent
+    cprintf("-I'm %d,parent of ", myproc()->pid);
+    cprintf("%d\n", giveYoungestChild(myproc()->pid));
+    wait();
+  }
+  else {
+    cprintf("fork failed\n");
+    return -1;
+  }
+  return 0;
+}

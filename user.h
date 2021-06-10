@@ -28,6 +28,7 @@ int processStartTime(void);
 int getAncestors(int);
 int setSleep(int);
 int getDescendants(int);
+int rwinit(void);
 
 // ulib.c
 int stat(const char*, struct stat*);
