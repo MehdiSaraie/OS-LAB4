@@ -15,7 +15,10 @@ initlock(struct spinlock *lk, char *name)
   lk->name = name;
   lk->locked = 0;
   lk->cpu = 0;
-  //lk->proc = myproc()->pid; //added
+  // added
+  // cprintf("myproc()->pid : %d", myproc()->pid);
+  lk->pid = 0;
+  lk->depth = 0;
 }
 
 // Acquire the lock.
@@ -25,8 +28,12 @@ initlock(struct spinlock *lk, char *name)
 void
 acquire(struct spinlock *lk)
 {
-  //if (lk->proc != myproc()->pid || lk->proc == -1) //added
-  //{
+  int current_pid = -1;
+  if (myproc() != 0)
+    current_pid = myproc()->pid;
+
+  if (lk->pid != current_pid) //added - this process doesnt have the lock
+  {
     pushcli(); // disable interrupts to avoid deadlock.
     if(holding(lk))
       panic("acquire");
@@ -34,8 +41,7 @@ acquire(struct spinlock *lk)
     // The xchg is atomic.
     while(xchg(&lk->locked, 1) != 0)
       ;
-    //lk->proc = myproc()->pid; //added
-  //}
+
   // Tell the C compiler and the processor to not move loads or stores
   // past this point, to ensure that the critical section's memory
   // references happen after the lock is acquired.
@@ -43,32 +49,42 @@ acquire(struct spinlock *lk)
 
   // Record info about lock acquisition for debugging.
   lk->cpu = mycpu();
+  //added - start
+  if (myproc() != 0)
+    lk->pid = myproc()->pid;
+  // added - end
   getcallerpcs(&lk, lk->pcs);
+  }
+  lk->depth++;
 }
 
 // Release the lock.
 void
 release(struct spinlock *lk)
 {
-  if(!holding(lk))
-    panic("release");
+  if (--lk->depth == 0) //added - this process doesnt have the lock
+  {
 
-  lk->pcs[0] = 0;
-  lk->cpu = 0;
-  //lk->proc = -1; //added
-  // Tell the C compiler and the processor to not move loads or stores
-  // past this point, to ensure that all the stores in the critical
-  // section are visible to other cores before the lock is released.
-  // Both the C compiler and the hardware may re-order loads and
-  // stores; __sync_synchronize() tells them both not to.
-  __sync_synchronize();
+    if(!holding(lk))
+      panic("release");
 
-  // Release the lock, equivalent to lk->locked = 0.
-  // This code can't use a C assignment, since it might
-  // not be atomic. A real OS would use C atomics here.
-  asm volatile("movl $0, %0" : "+m" (lk->locked) : );
+    lk->pcs[0] = 0;
+    lk->cpu = 0;
+    lk->pid = 0; //added
+    // Tell the C compiler and the processor to not move loads or stores
+    // past this point, to ensure that all the stores in the critical
+    // section are visible to other cores before the lock is released.
+    // Both the C compiler and the hardware may re-order loads and
+    // stores; __sync_synchronize() tells them both not to.
+    __sync_synchronize();
 
-  popcli();
+    // Release the lock, equivalent to lk->locked = 0.
+    // This code can't use a C assignment, since it might
+    // not be atomic. A real OS would use C atomics here.
+    asm volatile("movl $0, %0" : "+m" (lk->locked) : );
+
+    popcli();
+  }
 }
 
 // Record the current call stack in pcs[] by following the %ebp chain.
