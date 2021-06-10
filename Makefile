@@ -188,6 +188,7 @@ UPROGS=\
 	_up_SS\
 	_up_GD\
 	_rwinit\
+	_spinlockTester\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
@@ -264,6 +265,7 @@ EXTRA=\
 	up_SS.c\
 	up_GD.c\
 	rwinit.c\
+	spinlockTester.c\
 	printf.c umalloc.c\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\

@@ -123,6 +123,7 @@ void            yield(void);
 int             giveParent(int);           // added
 int             giveYoungestChild(int);    // added
 int             rwinit(uint);              // added
+int             spinlockTest(int);        // added
 
     // swtch.S
     void swtch(struct context **, struct context *);

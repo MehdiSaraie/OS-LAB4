@@ -25,4 +25,6 @@
 #define SYS_getAncestors 24
 #define SYS_setSleep 25
 #define SYS_getDescendants 26
+#define SYS_spinlockTest 27
 #define SYS_rwinit 28
+#define SYS_rwtest 29

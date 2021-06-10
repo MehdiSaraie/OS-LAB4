@@ -15,6 +15,7 @@ initlock(struct spinlock *lk, char *name)
   lk->name = name;
   lk->locked = 0;
   lk->cpu = 0;
+  //lk->proc = myproc()->pid; //added
 }
 
 // Acquire the lock.
@@ -24,14 +25,17 @@ initlock(struct spinlock *lk, char *name)
 void
 acquire(struct spinlock *lk)
 {
-  pushcli(); // disable interrupts to avoid deadlock.
-  if(holding(lk))
-    panic("acquire");
+  //if (lk->proc != myproc()->pid || lk->proc == -1) //added
+  //{
+    pushcli(); // disable interrupts to avoid deadlock.
+    if(holding(lk))
+      panic("acquire");
 
-  // The xchg is atomic.
-  while(xchg(&lk->locked, 1) != 0)
-    ;
-
+    // The xchg is atomic.
+    while(xchg(&lk->locked, 1) != 0)
+      ;
+    //lk->proc = myproc()->pid; //added
+  //}
   // Tell the C compiler and the processor to not move loads or stores
   // past this point, to ensure that the critical section's memory
   // references happen after the lock is acquired.
@@ -51,7 +55,7 @@ release(struct spinlock *lk)
 
   lk->pcs[0] = 0;
   lk->cpu = 0;
-
+  //lk->proc = -1; //added
   // Tell the C compiler and the processor to not move loads or stores
   // past this point, to ensure that all the stores in the critical
   // section are visible to other cores before the lock is released.
