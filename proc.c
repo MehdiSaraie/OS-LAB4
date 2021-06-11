@@ -620,19 +620,14 @@ int spinlockTest(int i) {
 }
 
 // added
-// struct spinlock rw_mutex;
-// struct spinlock mutex;
 struct sleeplock rw_mutex;
 struct sleeplock mutex;
 int read_count;
 int sharedCounter;
 
 int rwinit(void) {
-  // initlock(&rw_mutex, "rw_mutex");
-  // initlock(&mutex, "mutex");
   initsleeplock(&mutex, "rw_mutex");
   initsleeplock(&mutex, "mutex");
-
   read_count = 0;
   sharedCounter = 0;
   cprintf("- rw lock initialized\n");
@@ -656,18 +651,18 @@ int do_busy_wait(int time) {
 int rwtest(int role) {
   // cprintf("role: %d\n", role);
   if (role == 1) {  // writer
-    cprintf("writer with pid %d arrived\n", myproc()->pid);
+    cprintf("- writer with pid %d arrived\n", myproc()->pid);
 
     acquiresleep(&rw_mutex);
     // critical section
+    do_busy_wait(400);
     sharedCounter++;
-    cprintf("writer with pid %d wrote. sharedCounter: %d\n", myproc()->pid, sharedCounter);
+    cprintf("- writer with pid %d wrote. sharedCounter: %d\n", myproc()->pid, sharedCounter);
     // critical section
     releasesleep(&rw_mutex);
-    cprintf("writer with pid %d leaved\n", myproc()->pid);
     }
   else {  // reader
-    cprintf("reader with pid %d arrived\n", myproc()->pid);
+    cprintf("- reader with pid %d arrived\n", myproc()->pid);
     acquiresleep(&mutex);
     read_count++;
     if (read_count == 1)
@@ -678,14 +673,13 @@ int rwtest(int role) {
     do_busy_wait(300);
     // cprintf("tag %d, time: %d\n", myproc()->pid, ticks);
     sharedCounter--;
-    cprintf("reader with pid %d read. sharedCounter: %d\n", myproc()->pid, sharedCounter);
+    cprintf("- reader with pid %d read. sharedCounter: %d\n", myproc()->pid, sharedCounter);
     // critical section
     acquiresleep(&mutex);
     read_count--;
     if (read_count == 0)
       releasesleep(&rw_mutex);
     releasesleep(&mutex);
-    cprintf("reader with pid %d leaved\n", myproc()->pid);
   }
 
 
