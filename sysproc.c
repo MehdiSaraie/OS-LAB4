@@ -224,9 +224,13 @@ int sys_rwinit(void) {
 //added
 int sys_rwtest(void)
 {
-  int role;
-  if (argint(0, &role) < 0)
+  int role, priority;
+  if (argint(0, &role) < 0 || argint(1, &priority) < 0)
     return -1;
   
-  return rwtest(role);
+  if (priority == 0)
+  	return rwtest0(role);
+  else if (priority == 1)
+  	return rwtest1(role);
+  return -1;
 }

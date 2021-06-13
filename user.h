@@ -30,7 +30,7 @@ int setSleep(int);
 int getDescendants(int);
 int spinlockTest(int);
 int rwinit(void);
-int rwtest(uint);
+int rwtest(int, int);
 
 // ulib.c
 int stat(const char*, struct stat*);

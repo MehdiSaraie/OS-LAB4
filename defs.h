@@ -124,7 +124,8 @@ int             giveParent(int);           // added
 int             giveYoungestChild(int);    // added
 int             spinlockTest(int);         // added
 int             rwinit(void);              // added
-int             rwtest(int);               // added
+int             rwtest0(int);              // added
+int             rwtest1(int);              // added
 
     // swtch.S
     void swtch(struct context **, struct context *);

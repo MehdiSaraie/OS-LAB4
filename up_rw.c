@@ -29,7 +29,7 @@ int calcLength(int dec) {
 
 int main(int argc, char *argv[]) {
 
-    if (argc != 2) {
+    if (argc != 3) {
         printf(STDOUT, "bad argument\n");
         exit();
     }
@@ -40,12 +40,10 @@ int main(int argc, char *argv[]) {
     int *dec = decToBinary(atoi(argv[1]));
     int length = calcLength(atoi(argv[1]));
 /////////////////////////////////////////////////////////////////////////
-    // printf(STDOUT, "father has pid %d\n\n", getpid());
     for (int i = 0; i < length - 1; i++) {
         int n = fork();
         if (n == 0) {   // child
-            // printf(STDOUT, "sent %d to pid %d\n", dec[length - i - 2], getpid());
-            if (rwtest(dec[length - i - 2]) < 0) {
+            if (rwtest(dec[length - i - 2], atoi(argv[2])) < 0) {
                 printf(STDOUT, "rwtest failed\n");
                 exit();
             }

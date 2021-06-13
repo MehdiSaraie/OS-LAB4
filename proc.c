@@ -623,24 +623,25 @@ int spinlockTest(int i) {
 struct sleeplock rw_mutex;
 struct sleeplock mutex;
 int read_count;
+int write_count;
 int sharedCounter;
 
 int rwinit(void) {
-  initsleeplock(&mutex, "rw_mutex");
+  initsleeplock(&rw_mutex, "rw_mutex");
   initsleeplock(&mutex, "mutex");
   read_count = 0;
+  write_count = 0;
   sharedCounter = 0;
   cprintf("- rw lock initialized\n");
   return 0;
 }
 
-int do_busy_wait(int time) {
+int do_work(int time) {
   uint ticks0 = ticks;
 
   int x = 0;
   while (ticks - ticks0 < time)
   {
-    // cprintf("ticks: %d, ticks0: %d ***for pid: %d\n", ticks, ticks0, myproc()->pid);
     x++;
     x = myproc()->pid;
   }
@@ -648,19 +649,18 @@ int do_busy_wait(int time) {
   return 0;
 }
 
-int rwtest(int role) {
-  // cprintf("role: %d\n", role);
+int rwtest0(int role) {
   if (role == 1) {  // writer
     cprintf("- writer with pid %d arrived\n", myproc()->pid);
 
     acquiresleep(&rw_mutex);
     // critical section
-    do_busy_wait(400);
+    do_work(100);
     sharedCounter++;
     cprintf("- writer with pid %d wrote. sharedCounter: %d\n", myproc()->pid, sharedCounter);
     // critical section
     releasesleep(&rw_mutex);
-    }
+  }
   else {  // reader
     cprintf("- reader with pid %d arrived\n", myproc()->pid);
     acquiresleep(&mutex);
@@ -669,9 +669,7 @@ int rwtest(int role) {
       acquiresleep(&rw_mutex);
     releasesleep(&mutex);
     // critical section
-    // cprintf("tag %d, time: %d\n", myproc()->pid, ticks);
-    do_busy_wait(300);
-    // cprintf("tag %d, time: %d\n", myproc()->pid, ticks);
+    do_work(100);
     sharedCounter--;
     cprintf("- reader with pid %d read. sharedCounter: %d\n", myproc()->pid, sharedCounter);
     // critical section
@@ -682,6 +680,40 @@ int rwtest(int role) {
     releasesleep(&mutex);
   }
 
+  return 0;
+}
+
+int rwtest1(int role) {
+  if (role == 1) {  // writer
+    cprintf("- writer with pid %d arrived\n", myproc()->pid);
+    acquiresleep(&mutex);
+    write_count++;
+    if (write_count == 1)
+      acquiresleep(&rw_mutex);
+    releasesleep(&mutex);
+    // critical section
+    do_work(100);
+    sharedCounter++;
+    cprintf("- writer with pid %d wrote. sharedCounter: %d\n", myproc()->pid, sharedCounter);
+    // critical section
+    acquiresleep(&mutex);
+    write_count--;
+    if (write_count == 0)
+      releasesleep(&rw_mutex);
+    releasesleep(&mutex);
+  }
+  else {  // reader
+    cprintf("- reader with pid %d arrived\n", myproc()->pid);
+
+    acquiresleep(&rw_mutex);
+    // critical section
+    do_work(100);
+    sharedCounter--;
+    cprintf("- reader with pid %d read. sharedCounter: %d\n", myproc()->pid, sharedCounter);
+    // critical section
+    releasesleep(&rw_mutex);
+  }
 
   return 0;
 }
+
